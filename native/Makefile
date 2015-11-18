@@ -1,4 +1,4 @@
-all: dvr
+all: dvr.app
 
 CC = g++
 CFLAGS = -ggdb -W
@@ -7,7 +7,7 @@ OBJS = HTTP.o MyServerSocket.o MySocket.o http_parser.o main.o HTTPRequest.o
 
 -include $(OBJS:.o=.d)
 
-dvr: $(OBJS)
+dvr.app: $(OBJS)
 	$(CC) -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS)
 
 %.d: %.cpp
@@ -28,4 +28,4 @@ dvr: $(OBJS)
 	gcc $(CFLAGS) -c $< -o $@
 
 clean: 
-	rm -f dvr *.o *~ core.* *.d
+	rm -f dvr.app *.o *~ core.* *.d
