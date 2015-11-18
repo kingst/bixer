@@ -3,7 +3,9 @@ all: dvr.app
 CC = g++
 CFLAGS = -ggdb -W
 
-OBJS = HTTP.o MyServerSocket.o MySocket.o http_parser.o main.o HTTPRequest.o
+OBJS = HTTP.o MyServerSocket.o MySocket.o http_parser.o main.o HTTPRequest.o \
+	Process.o
+LDFLAGS = -lpthread
 
 -include $(OBJS:.o=.d)
 

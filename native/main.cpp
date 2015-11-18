@@ -10,36 +10,11 @@
 #include "HTTPRequest.h"
 #include "MySocket.h"
 #include "MyServerSocket.h"
+#include "Process.h"
 
 using namespace std;
 
-#define PIPE_WRITE 1
-#define PIPE_READ  0
-
 static const char *testArgv[] = {"./test.sh", NULL};
-
-int createProc(const char *argv[]) {
-  int pret;
-  const char *file = argv[0];
-  int outFd[2];
-  int pid;
-
-  pret = pipe(outFd); assert(pret == 0);
-
-  pid = fork();
-  if(pid == 0) {
-    dup2(outFd[PIPE_WRITE], STDOUT_FILENO);
-
-    execvp((char *) file, (char **) argv);
-    assert(0);
-  } else {
-    close(outFd[PIPE_WRITE]);
-    return outFd[PIPE_READ];
-  }
-
-  return -1;
-}
-
 int PORT = 8080;
 
 int main(int /*argc*/, char */*argv*/[]) {
@@ -48,6 +23,7 @@ int main(int /*argc*/, char */*argv*/[]) {
 
   MyServerSocket *server = new MyServerSocket(PORT);
   MySocket *client;
+  Process *proc = new Process(testArgv, false, true);
 
   while(true) {
     client = server->accept();
@@ -62,7 +38,8 @@ int main(int /*argc*/, char */*argv*/[]) {
       client->write_bytes("\r\n");
     }
 
-    int fd = createProc(testArgv);
+    proc->run();
+    int fd = proc->stdoutFd();
     char chunkHeader[256];
     while((ret = read(fd, buf, sizeof(buf))) > 0) {
       snprintf(chunkHeader, sizeof(chunkHeader), "%x\r\n", ret);
