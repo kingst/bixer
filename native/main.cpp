@@ -1,13 +1,10 @@
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
-#include <stdio.h>
 #include <assert.h>
 
 #include <iostream>
 
-#include "HTTPRequest.h"
+#include "HttpStreamingService.h"
 #include "MySocket.h"
 #include "MyServerSocket.h"
 #include "Process.h"
@@ -28,27 +25,15 @@ int main(int /*argc*/, char */*argv*/[]) {
   while(true) {
     client = server->accept();
 
-    HTTPRequest *request = new HTTPRequest(client, PORT);
-    if(!request->readRequest()) {
-      cout << "did not read request" << endl;
-    } else {    
-      client->write_bytes("HTTP/1.1 200 OK\r\n");
-      client->write_bytes("Content-Type: video/mp2t;charset=utf-8\r\n");
-      client->write_bytes("Transfer-Encoding: chunked\r\n");
-      client->write_bytes("\r\n");
-    }
-
+    HttpStreamingService::serviceRequest(client, "video/mp2t;charset=utf-8");
     proc->run();
     int fd = proc->stdoutFd();
     char chunkHeader[256];
     while((ret = read(fd, buf, sizeof(buf))) > 0) {
-      snprintf(chunkHeader, sizeof(chunkHeader), "%x\r\n", ret);
-      client->write_bytes(chunkHeader);
-      client->write_bytes(buf, ret);
-      client->write_bytes("\r\n");
+      HttpStreamingService::writeChunk(client, buf, ret);
     }
 
-    client->write_bytes("0\r\n\r\n");
+    HttpStreamingService::writeLastChunk(client);
   }
 
 }
