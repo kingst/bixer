@@ -8,7 +8,7 @@
 class HttpStreamingService {
  public:
   static bool serviceRequest(MySocket *client, std::string contentType);
-  static void writeChunk(MySocket *client, void *buf, int numBytes);
+  static void writeChunk(MySocket *client, const void *buf, int numBytes);
   static void writeLastChunk(MySocket *client);
 };
 

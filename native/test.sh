@@ -1,2 +1,2 @@
 #!/bin/bash
-cat nick.ts
+dd if=/dev/zero bs=256k count=10240

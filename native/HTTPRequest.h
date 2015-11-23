@@ -18,6 +18,8 @@ class HTTPRequest {
     std::string getRequest();
     std::string getUrl();
     bool isConnect();
+    bool isGet() {return m_http->isGet();}
+    bool isHead() {return m_http->isHead();}
 
     void printDebugInfo();
     

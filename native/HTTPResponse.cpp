@@ -8,6 +8,7 @@ HTTPResponse::HTTPResponse() {
   this->streaming = false;
   this->contentType = "text/html; charset=ISO-8859-1";
   this->headers["Server"] = "Bixer";
+  this->status = 200;
 }
 
 void HTTPResponse::withStreaming(bool omitChunkedHeader) {

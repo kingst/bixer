@@ -22,6 +22,8 @@ class HTTP {
     std::string getHost();
     std::string getUrl();
     bool isConnect() {return m_method == HTTP_CONNECT;}
+    bool isHead() {return m_method == HTTP_HEAD;}
+    bool isGet() {return m_method == HTTP_GET;}
     std::string getBody();
 
  private:

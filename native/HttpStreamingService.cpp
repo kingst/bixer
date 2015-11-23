@@ -26,7 +26,7 @@ bool HttpStreamingService::serviceRequest(MySocket *client,
 }
 
 void HttpStreamingService::writeChunk(MySocket *client,
-				      void *buf, int numBytes) {
+				      const void *buf, int numBytes) {
 
   char chunkHeader[256];
   snprintf(chunkHeader, sizeof(chunkHeader), "%x\r\n", numBytes);
