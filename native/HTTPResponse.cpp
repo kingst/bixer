@@ -11,9 +11,8 @@ HTTPResponse::HTTPResponse() {
   this->status = 200;
 }
 
-void HTTPResponse::withStreaming(bool omitChunkedHeader) {
+void HTTPResponse::withStreaming() {
   this->streaming = true;
-  this->omitChunkedHeader = omitChunkedHeader;
 }
 
 void HTTPResponse::setHeader(string name, string value) {
@@ -44,9 +43,7 @@ string HTTPResponse::response() {
   stringstream out;
   setHeader("Content-Type", contentType);
   if (streaming) {
-    if (!omitChunkedHeader) {
-      setHeader("Transfer-Encoding", "chunked");
-    }
+    setHeader("Transfer-Encoding", "chunked");
   } else {
     stringstream len;
     len << body.size();

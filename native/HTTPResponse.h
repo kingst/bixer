@@ -7,7 +7,7 @@
 class HTTPResponse {
  public:
   HTTPResponse();
-  void withStreaming(bool omitChunkedHeader=false);
+  void withStreaming();
   void setHeader(std::string name, std::string value);
   void setBody(std::string data);
   void setContentType(std::string contentType);
@@ -19,7 +19,6 @@ class HTTPResponse {
 
   int status;
   bool streaming;
-  bool omitChunkedHeader;
   std::map<std::string, std::string> headers;
   std::string body;
   std::string contentType;

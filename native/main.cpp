@@ -9,63 +9,26 @@
 #include "HTTPRequest.h"
 #include "HTTPResponse.h"
 #include "HttpStreamingService.h"
+#include "IptvService.h"
 #include "MySocket.h"
 #include "MyServerSocket.h"
 #include "Process.h"
 
 using namespace std;
 
-static const char *testArgv[] = {"./test.sh", NULL};
 int PORT = 8080;
 
 struct ThreadData {
-  BlockingQueue<string> queue;
-  bool shouldRun;
-  MySocket *client;
+  BlockingQueue<string> *queue;
+  HttpStreamingService *service;
 };
 
-void *tvCaptureThread(void *arg) {
+void *streamService(void *arg) {
   struct ThreadData *threadData = (struct ThreadData *) arg;
-  Process *proc = new Process(testArgv, false, true);
-  unsigned char buf[4*4096];
-  int ret;
-
-  proc->run();
-  int fd = proc->stdoutFd();
-  while (threadData->shouldRun && (ret = read(fd, buf, sizeof(buf))) > 0) {
-    threadData->queue.pushBack(string((char *) buf, ret));
-  }
-
+  threadData->service->stream(threadData->queue);
   return NULL;
 }
 
-void *kodiThread(void *arg) {
-  struct ThreadData *threadData = (struct ThreadData *) arg;
-  string data;
-  while (threadData->shouldRun) {
-    data = threadData->queue.popFront();
-    HttpStreamingService::writeChunk(threadData->client,
-				     data.c_str(), data.length());
-  }
-
-  return NULL;
-}
-
-void handleGet(MySocket *client) {
-  struct ThreadData *threadData = new struct ThreadData;
-  threadData->shouldRun = true;
-  threadData->client = client;
-
-  pthread_t kodi, capture;
-  pthread_create(&capture, NULL, tvCaptureThread, threadData);
-  pthread_create(&kodi, NULL, kodiThread, threadData);
-
-  pthread_join(kodi, NULL);
-  threadData->shouldRun = false;
-  pthread_join(capture, NULL);
-
-  delete threadData;
-}
 
 void *child(void *arg) {
 
@@ -75,27 +38,31 @@ void *child(void *arg) {
   while (requestActive) {
     HTTPRequest *request = new HTTPRequest(client, PORT);
     HTTPResponse *response = new HTTPResponse();
-    response->setContentType("video/mp2t;charset=utf-8");
-    
-    if (!request->readRequest()) {
-      cout << "could not read request" << endl;
-      requestActive = false;
-    } else if (request->isHead() || request->isGet()) {
-      response->withStreaming(request->isHead());
-      string responseString = response->response();
-      if (!client->write_bytes(responseString)) {
-	requestActive = false;
-      }
-      
-      if (request->isGet()) {
-	handleGet(client);
-      } else {
-	requestActive = false;
-      }
+    IptvService *service = new IptvService();
 
-    } else {
-      cout << "unsupported method" << endl;
-      return NULL;
+    if (!request->readRequest()) {
+      // XXX FIXME throw an exception
+      break;
+    } else if (request->isHead()) {
+      service->head(request, response);
+      client->write_bytes(response->response());
+    } else if (request->isGet()) {
+      service->get(request, response);
+      client->write_bytes(response->response());
+      
+      BlockingQueue<string> *queue = new BlockingQueue<string>();
+      struct ThreadData *threadData = new struct ThreadData;
+      threadData->queue = queue;
+      threadData->service = service;
+      pthread_t tid;
+      pthread_create(&tid, NULL, streamService, threadData);
+      pthread_detach(tid);
+
+      string data;
+      while (true) {
+	data = queue->popFront();
+	HttpStreamingService::writeChunk(client, data.c_str(), data.length());
+      }
     }
     
     delete response;
@@ -119,5 +86,4 @@ int main(int /*argc*/, char */*argv*/[]) {
     pthread_create(&tid, NULL, child, client);
     pthread_detach(tid);
   }
-
 }

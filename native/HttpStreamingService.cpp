@@ -4,26 +4,35 @@
 #include <stdio.h>
 
 #include "HttpStreamingService.h"
-#include "HTTPRequest.h"
 
 using namespace std;
 
-bool HttpStreamingService::serviceRequest(MySocket *client,
-					  string contentType) {
-
-  HTTPRequest *request = new HTTPRequest(client, 0);
-  if(!request->readRequest()) {
-    cout << "did not read request" << endl;
-    return false;
-  } else {    
-    client->write_bytes("HTTP/1.1 200 OK\r\n");
-    client->write_bytes("Content-Type: " + contentType + "\r\n");
-    client->write_bytes("Transfer-Encoding: chunked\r\n");
-    client->write_bytes("\r\n");
-  }
-
-  return true;
+HttpStreamingService::HttpStreamingService(string contentType) {
+  this->contentType = contentType;
 }
+
+void HttpStreamingService::stream(BlockingQueue<string> *streamData) {
+  // don't do anything, should override
+}
+
+void HttpStreamingService::getOrHead(HTTPRequest *request,
+				     HTTPResponse *response) {
+  if (contentType.size() > 0) {
+    response->setContentType(contentType);
+  }
+  response->withStreaming();  
+}
+
+void HttpStreamingService::head(HTTPRequest *request, HTTPResponse *response) {
+  cout << "HEAD" << endl;
+  getOrHead(request, response);
+}
+
+void HttpStreamingService::get(HTTPRequest *request, HTTPResponse *response) {
+  cout << "GET" << endl;
+  getOrHead(request, response);
+}
+
 
 void HttpStreamingService::writeChunk(MySocket *client,
 				      const void *buf, int numBytes) {
