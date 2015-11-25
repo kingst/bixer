@@ -6,6 +6,12 @@
 #include <queue>
 #include <stdexcept>
 
+/**
+ * Note: the semantics of close are a little strange in that
+ * it will kill the queue even if there are still items in the
+ * buffer.
+ */
+
 class BlockingQueueClosedException : public std::runtime_error {
  public:
   BlockingQueueClosedException() : std::runtime_error("queue closed") {}

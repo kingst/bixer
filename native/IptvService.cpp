@@ -9,9 +9,9 @@
 
 using namespace std;
 
-static const char *testArgv[] = {"dd", "if=/dev/zero", "bs=256k", NULL};
+static const char *testArgv[] = {"./test.sh", NULL};
 
-IptvService::IptvService() : HttpStreamingService("/dev/null") {
+IptvService::IptvService() : HttpStreamingService("video/mp2t") {
   proc = new Process(testArgv, false, true);
 }
 
