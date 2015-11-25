@@ -5,10 +5,14 @@
 #include <stdio.h>
 #include <assert.h>
 #include <signal.h>
+#include <string.h>
 
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include "Process.h"
+#include "HttpUtils.h"
 
 #define PIPE_WRITE 1
 #define PIPE_READ  0
@@ -85,4 +89,28 @@ void Process::wait() {
 
 int Process::stdoutFd() {
   return outFd[PIPE_READ];
+}
+
+void Process::runCommand(string command) {
+  vector<string> stringArgs = HttpUtils::split(command, ' ');
+  char **args = new char *[stringArgs.size() + 1];
+  args[stringArgs.size()] = NULL;
+
+  for (unsigned int idx = 0; idx < stringArgs.size(); idx++) {
+    string stringArg = stringArgs[idx];
+    char *arg = new char[stringArg.size()+1];
+    strcpy(arg, stringArg.c_str());
+    args[idx] = arg;
+  }
+
+  Process *proc = new Process((const char **) args, false, false);
+  proc->run();
+  proc->wait();
+
+  for (unsigned int idx = 0; idx < stringArgs.size(); idx++) {
+    delete [] args[idx];
+  }
+
+  delete [] args;
+  delete proc;
 }

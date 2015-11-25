@@ -11,6 +11,7 @@
 #include "HTTPRequest.h"
 #include "HTTPResponse.h"
 #include "HttpStreamingService.h"
+#include "HttpUtils.h"
 #include "IptvService.h"
 #include "MySocket.h"
 #include "MyServerSocket.h"
@@ -73,7 +74,7 @@ void *child(void *arg) {
 	string data;      
 	while (true) {
 	  data = queue->popFront();
-	  HttpStreamingService::writeChunk(client, data.c_str(), data.length());
+	  HttpUtils::writeChunk(client, data.c_str(), data.length());
 	}
       } catch (MySocketException mse) {
 	requestActive = false;

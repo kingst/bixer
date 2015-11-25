@@ -1,13 +1,17 @@
 #ifndef PROCESS_H_
 #define PROCESS_H_
 
+#include <string>
+
 class Process {
  public:
-  Process(const char *args[], bool pipeStdin, bool pipeStdout);
+  Process(const char **args, bool pipeStdin, bool pipeStdout);
   bool run();
   int stdoutFd();
   void kill();
   void wait();
+
+  static void runCommand(std::string command);
 
  private:
   bool pipeStdin;

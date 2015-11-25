@@ -32,20 +32,3 @@ void HttpStreamingService::get(HTTPRequest *request, HTTPResponse *response) {
   cout << "GET" << endl;
   getOrHead(request, response);
 }
-
-
-void HttpStreamingService::writeChunk(MySocket *client,
-				      const void *buf, int numBytes) {
-
-  char chunkHeader[256];
-  snprintf(chunkHeader, sizeof(chunkHeader), "%x\r\n", numBytes);
-  client->write_bytes(chunkHeader);
-  if (buf != NULL && numBytes > 0) {
-    client->write_bytes(buf, numBytes);
-  }
-  client->write_bytes("\r\n");
-}
-
-void HttpStreamingService::writeLastChunk(MySocket *client) {
-  writeChunk(client, NULL, 0);
-}

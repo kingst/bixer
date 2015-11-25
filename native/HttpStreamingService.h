@@ -17,9 +17,6 @@ class HttpStreamingService {
   virtual void head(HTTPRequest *request, HTTPResponse *response);
   virtual void get(HTTPRequest *request, HTTPResponse *response);
 
-  static void writeChunk(MySocket *client, const void *buf, int numBytes);
-  static void writeLastChunk(MySocket *client);
-
  private:
   std::string contentType;
   void getOrHead(HTTPRequest *request, HTTPResponse *response);

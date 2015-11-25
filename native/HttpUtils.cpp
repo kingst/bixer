@@ -23,6 +23,25 @@ map<string, string> HttpUtils::params(string query) {
   return paramMap;
 }
 
+void HttpUtils::writeChunk(MySocket *client,
+				      const void *buf, int numBytes) {
+
+  char chunkHeader[256];
+  snprintf(chunkHeader, sizeof(chunkHeader), "%x\r\n", numBytes);
+  client->write_bytes(chunkHeader);
+  if (buf != NULL && numBytes > 0) {
+    client->write_bytes(buf, numBytes);
+  }
+  client->write_bytes("\r\n");
+}
+
+void HttpUtils::writeLastChunk(MySocket *client) {
+  writeChunk(client, NULL, 0);
+}
+
+
+// split lifted from stackoverflow
+// http://stackoverflow.com/questions/236129/split-a-string-in-c
 vector<string> &HttpUtils::split(const string &s,
 		      char delim,
 		      vector<string> &elems) {
