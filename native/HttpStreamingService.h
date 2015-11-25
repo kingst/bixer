@@ -11,6 +11,7 @@
 class HttpStreamingService {
  public:
   HttpStreamingService(std::string contentType);
+  virtual ~HttpStreamingService() {}
   virtual void stream(BlockingQueue<std::string> *streamData);
 
   virtual void head(HTTPRequest *request, HTTPResponse *response);

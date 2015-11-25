@@ -4,11 +4,16 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <assert.h>
+#include <signal.h>
+
+#include <iostream>
 
 #include "Process.h"
 
 #define PIPE_WRITE 1
 #define PIPE_READ  0
+
+using namespace std;
 
 Process::Process(const char **args, bool pipeStdin, bool pipeStdout) {
   this->args = args;
@@ -60,6 +65,22 @@ bool Process::run() {
     }
     return true;
   }
+}
+
+void Process::kill() {
+  if (pid < 0) {
+    return;
+  }
+
+  int ret = ::kill(pid, SIGKILL);
+}
+
+void Process::wait() {
+  if (pid < 0) {
+    return;
+  }
+
+  int ret = waitpid(pid, NULL, 0);
 }
 
 int Process::stdoutFd() {

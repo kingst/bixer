@@ -1,7 +1,7 @@
 all: dvr.app
 
 CC = g++
-CFLAGS = -ggdb -W
+CFLAGS = -ggdb -W -std=c++11
 
 OBJS = HTTP.o MyServerSocket.o MySocket.o http_parser.o main.o HTTPRequest.o \
 	Process.o HttpStreamingService.o HTTPResponse.o IptvService.o

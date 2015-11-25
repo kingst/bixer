@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
+#include <signal.h>
 
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "BlockingQueue.h"
@@ -19,13 +21,21 @@ using namespace std;
 int PORT = 8080;
 
 struct ThreadData {
-  BlockingQueue<string> *queue;
+  shared_ptr<BlockingQueue<string>> queue;
   HttpStreamingService *service;
 };
 
 void *streamService(void *arg) {
   struct ThreadData *threadData = (struct ThreadData *) arg;
-  threadData->service->stream(threadData->queue);
+  try {
+    threadData->service->stream(threadData->queue.get());
+  } catch (...) {}
+
+  cout << "deleting service" << endl;
+  delete threadData->service;
+  delete threadData;
+  cout << "done" << endl;
+
   return NULL;
 }
 
@@ -50,7 +60,8 @@ void *child(void *arg) {
       service->get(request, response);
       client->write_bytes(response->response());
       
-      BlockingQueue<string> *queue = new BlockingQueue<string>();
+      shared_ptr<BlockingQueue<string>> queue =
+	shared_ptr<BlockingQueue<string>>(new BlockingQueue<string>());
       struct ThreadData *threadData = new struct ThreadData;
       threadData->queue = queue;
       threadData->service = service;
@@ -58,11 +69,18 @@ void *child(void *arg) {
       pthread_create(&tid, NULL, streamService, threadData);
       pthread_detach(tid);
 
-      string data;
-      while (true) {
-	data = queue->popFront();
-	HttpStreamingService::writeChunk(client, data.c_str(), data.length());
+      try {
+	string data;      
+	while (true) {
+	  data = queue->popFront();
+	  HttpStreamingService::writeChunk(client, data.c_str(), data.length());
+	}
+      } catch (MySocketException mse) {
+	requestActive = false;
+      } catch (...) {
+	// swallow it
       }
+      queue->close();
     }
     
     delete response;
@@ -76,6 +94,8 @@ void *child(void *arg) {
 }
 
 int main(int /*argc*/, char */*argv*/[]) {
+
+  signal(SIGPIPE, SIG_IGN);
 
   MyServerSocket *server = new MyServerSocket(PORT);
   MySocket *client;

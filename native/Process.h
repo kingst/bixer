@@ -6,6 +6,8 @@ class Process {
   Process(const char *args[], bool pipeStdin, bool pipeStdout);
   bool run();
   int stdoutFd();
+  void kill();
+  void wait();
 
  private:
   bool pipeStdin;
