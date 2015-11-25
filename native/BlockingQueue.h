@@ -19,14 +19,15 @@ class BlockingQueueClosedException : public std::runtime_error {
 
 template <class T> class BlockingQueue {
  public:
-  
+
   BlockingQueue() {
     isClosed = false;
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init(&queueEmpty, NULL);
     pthread_cond_init(&queueFull, NULL);
-  
+
     maxItems = 1024;
+    initialItems = 64;
   }
 
   void checkClosed() {
@@ -45,8 +46,11 @@ template <class T> class BlockingQueue {
       checkClosed();
     }
 
+    if (initialItems > 0) {
+            initialItems--;
+    }
     dataQueue.push_back(item);
-    
+
     pthread_cond_signal(&queueEmpty);
     pthread_mutex_unlock(&mutex);
   }
@@ -55,14 +59,14 @@ template <class T> class BlockingQueue {
     pthread_mutex_lock(&mutex);
     checkClosed();
 
-    while (dataQueue.size() == 0) {
+    while ((dataQueue.size() == 0) || (initialItems > 0)) {
       pthread_cond_wait(&queueEmpty, &mutex);
       checkClosed();
     }
 
     T item = dataQueue.front();
     dataQueue.pop_front();
-  
+
     pthread_cond_signal(&queueFull);
     pthread_mutex_unlock(&mutex);
 
@@ -82,7 +86,8 @@ template <class T> class BlockingQueue {
   pthread_mutex_t mutex;
   pthread_cond_t queueEmpty;
   pthread_cond_t queueFull;
-  int maxItems;
+  unsigned int maxItems;
+  unsigned int initialItems;
   bool isClosed;
 };
 

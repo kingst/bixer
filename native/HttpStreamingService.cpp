@@ -11,16 +11,16 @@ HttpStreamingService::HttpStreamingService(string contentType) {
   this->contentType = contentType;
 }
 
-void HttpStreamingService::stream(BlockingQueue<string> *streamData) {
+void HttpStreamingService::stream(BlockingQueue<string> */*streamData*/) {
   // don't do anything, should override
 }
 
-void HttpStreamingService::getOrHead(HTTPRequest *request,
+void HttpStreamingService::getOrHead(HTTPRequest */*request*/,
 				     HTTPResponse *response) {
   if (contentType.size() > 0) {
     response->setContentType(contentType);
   }
-  response->withStreaming();  
+  response->withStreaming();
 }
 
 void HttpStreamingService::head(HTTPRequest *request, HTTPResponse *response) {
