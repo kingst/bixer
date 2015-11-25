@@ -5,6 +5,7 @@
 #include "http_parser.h"
 #include "HTTP.h"
 
+#include <map>
 #include <string>
 
 class HTTPRequest {
@@ -20,6 +21,7 @@ class HTTPRequest {
     bool isConnect();
     bool isGet() {return m_http->isGet();}
     bool isHead() {return m_http->isHead();}
+    std::map<std::string, std::string> getParams();
 
     void printDebugInfo();
     

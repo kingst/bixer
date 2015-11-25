@@ -25,6 +25,7 @@ class HTTP {
     bool isHead() {return m_method == HTTP_HEAD;}
     bool isGet() {return m_method == HTTP_GET;}
     std::string getBody();
+    std::string getQuery() {return m_query;}
 
  private:
     static int message_begin_cb(http_parser *parser);

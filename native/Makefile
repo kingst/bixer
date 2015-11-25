@@ -5,7 +5,9 @@ CFLAGS = -ggdb -W
 CPPFLAGS = $(CFLAGS) -std=c++11
 
 OBJS = HTTP.o MyServerSocket.o MySocket.o http_parser.o main.o HTTPRequest.o \
-	Process.o HttpStreamingService.o HTTPResponse.o IptvService.o
+	Process.o HttpStreamingService.o HTTPResponse.o IptvService.o \
+	HttpUtils.o
+
 LDFLAGS = -lpthread
 
 -include $(OBJS:.o=.d)
