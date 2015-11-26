@@ -1,4 +1,4 @@
-all: dvr.app
+all: bixer.app
 
 CC = g++
 CFLAGS = -ggdb -W
@@ -12,7 +12,7 @@ LDFLAGS = -lpthread
 
 -include $(OBJS:.o=.d)
 
-dvr.app: $(OBJS)
+bixer.app: $(OBJS)
 	$(CC) -o $@ $(CPPFLAGS) $(OBJS) $(LDFLAGS)
 
 %.d: %.cpp
@@ -33,4 +33,4 @@ dvr.app: $(OBJS)
 	gcc $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f dvr.app *.o *~ core.* *.d
+	rm -f bixer.app *.o *~ core.* *.d

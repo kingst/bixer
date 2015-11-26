@@ -9,6 +9,7 @@ class IptvService : public HttpStreamingService {
   IptvService();
   virtual ~IptvService();
 
+  virtual void get(HTTPRequest *request, HTTPResponse *response);
   virtual void stream(BlockingQueue<std::string> *streamData);
 
  private:
