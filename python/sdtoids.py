@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 import json
+import re
 import sys
 import xmltodict
 
 channel_map = {}
+
+prog = re.compile('(\d+)\s')
 
 def parse_channel_id(path):
     for item in path:
@@ -13,7 +16,9 @@ def parse_channel_id(path):
 def handle_channel(path, item):
     channel_id = parse_channel_id(path)
     if channel_id:
-        channel_map[item["display-name"][0]] = channel_id
+        result = prog.match(item["display-name"][0])
+        if result:
+            channel_map[result.group(1)] = channel_id
 
     return True
 
