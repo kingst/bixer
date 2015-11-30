@@ -27,7 +27,6 @@ template <class T> class BlockingQueue {
     pthread_cond_init(&queueFull, NULL);
 
     maxItems = 1024;
-    initialItems = 64;
   }
 
   void checkClosed() {
@@ -46,9 +45,6 @@ template <class T> class BlockingQueue {
       checkClosed();
     }
 
-    if (initialItems > 0) {
-            initialItems--;
-    }
     dataQueue.push_back(item);
 
     pthread_cond_signal(&queueEmpty);
@@ -59,7 +55,7 @@ template <class T> class BlockingQueue {
     pthread_mutex_lock(&mutex);
     checkClosed();
 
-    while ((dataQueue.size() == 0) || (initialItems > 0)) {
+    while (dataQueue.size() == 0) {
       pthread_cond_wait(&queueEmpty, &mutex);
       checkClosed();
     }
@@ -87,7 +83,6 @@ template <class T> class BlockingQueue {
   pthread_cond_t queueEmpty;
   pthread_cond_t queueFull;
   unsigned int maxItems;
-  unsigned int initialItems;
   bool isClosed;
 };
 

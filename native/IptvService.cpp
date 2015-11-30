@@ -45,7 +45,7 @@ void IptvService::get(HTTPRequest *request, HTTPResponse *response) {
 }
 
 void IptvService::stream(BlockingQueue<std::string> *streamData) {
-  unsigned char buf[4*4096];
+  unsigned char buf[4096];
   int ret;
 
   proc->run();
