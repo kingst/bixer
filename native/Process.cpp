@@ -20,7 +20,53 @@
 using namespace std;
 
 Process::Process(const char **args, bool pipeStdin, bool pipeStdout) {
-  this->args = args;
+  init(pipeStdin, pipeStdout);
+
+  int argc = 0;
+  while(args[argc] != NULL) {
+    argc++;
+  }
+  
+  this->args = new char *[argc + 1];
+  this->args[argc] = NULL;
+  for (int idx = 0; idx < argc; idx++) {
+    this->args[idx] = new char [strlen(args[idx]) + 1];
+    strcpy(this->args[idx], args[idx]);
+  }
+}
+
+Process::Process(string command, bool pipeStdin, bool pipeStdout) {
+  init(pipeStdin, pipeStdout);
+
+  vector<string> stringArgs = HttpUtils::split(command, ' ');
+  args = new char *[stringArgs.size() + 1];
+  args[stringArgs.size()] = NULL;
+
+  for (unsigned int idx = 0; idx < stringArgs.size(); idx++) {
+    string stringArg = stringArgs[idx];
+    char *arg = new char[stringArg.size()+1];
+    strcpy(arg, stringArg.c_str());
+    args[idx] = arg;
+  }
+}
+
+Process::~Process() {
+  int idx = 0;
+  while (args[idx] != NULL) {
+    delete [] args[idx];
+    idx++;
+  }
+
+  delete [] args;
+  if (inFd[PIPE_READ] >= 0) close(inFd[PIPE_READ]);
+  if (inFd[PIPE_WRITE] >= 0) close(inFd[PIPE_WRITE]);
+  if (outFd[PIPE_READ] >= 0) close(outFd[PIPE_READ]);
+  if (outFd[PIPE_WRITE] >= 0) close(outFd[PIPE_WRITE]);
+
+  // if the process is still running, let it run
+}
+
+void Process::init(bool pipeStdin, bool pipeStdout) {
   this->pid = -1;
   this->pipeStdin = pipeStdin;
   this->pipeStdout = pipeStdout;
@@ -92,25 +138,8 @@ int Process::stdoutFd() {
 }
 
 void Process::runCommand(string command) {
-  vector<string> stringArgs = HttpUtils::split(command, ' ');
-  char **args = new char *[stringArgs.size() + 1];
-  args[stringArgs.size()] = NULL;
-
-  for (unsigned int idx = 0; idx < stringArgs.size(); idx++) {
-    string stringArg = stringArgs[idx];
-    char *arg = new char[stringArg.size()+1];
-    strcpy(arg, stringArg.c_str());
-    args[idx] = arg;
-  }
-
-  Process *proc = new Process((const char **) args, false, false);
+  Process *proc = new Process(command, false, false);
   proc->run();
   proc->wait();
-
-  for (unsigned int idx = 0; idx < stringArgs.size(); idx++) {
-    delete [] args[idx];
-  }
-
-  delete [] args;
   delete proc;
 }
