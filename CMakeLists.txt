@@ -23,7 +23,7 @@ target_link_libraries (bixer libbixer)
 ################################
 if (test)
   # This adds another subdirectory, which has 'project(gtest)'.
-  add_subdirectory(submodules/googletest/googletest)
+  add_subdirectory(submodules/googletest/googlemock)
 
   enable_testing()
 
