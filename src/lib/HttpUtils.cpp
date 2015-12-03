@@ -31,11 +31,11 @@ void HttpUtils::writeChunk(MySocket *client,
 
   char chunkHeader[256];
   snprintf(chunkHeader, sizeof(chunkHeader), "%x\r\n", numBytes);
-  client->write_bytes(chunkHeader);
+  client->write(chunkHeader);
   if (buf != NULL && numBytes > 0) {
-    client->write_bytes(buf, numBytes);
+    client->write(string((const char *) buf, numBytes));
   }
-  client->write_bytes("\r\n");
+  client->write("\r\n");
 }
 
 void HttpUtils::writeLastChunk(MySocket *client) {

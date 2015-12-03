@@ -1,8 +1,10 @@
 #ifndef MYSERVERSOCKET_H
 #define MYSERVERSOCKET_H
 
+#include <stdexcept>
+#include <string>
+
 #include "MySocket.h"
-#include "MySocketException.h"
 
 class MyServerSocket {
  public:

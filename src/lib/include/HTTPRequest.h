@@ -26,7 +26,7 @@ class HTTPRequest {
     void printDebugInfo();
     
  protected:
-    void onRead(const unsigned char *buffer, unsigned int len);
+    void onRead(const char *buffer, unsigned int len);
 
     MySocket *m_sock;
     HTTP *m_http;

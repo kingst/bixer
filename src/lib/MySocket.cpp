@@ -9,8 +9,7 @@
 
 using namespace std;
 
-MySocket::MySocket(const char *inetAddr, int port)
-{
+MySocket::MySocket(const char *inetAddr, int port) {
     struct sockaddr_in server;
     struct addrinfo hints;
     struct addrinfo *res;
@@ -25,7 +24,7 @@ MySocket::MySocket(const char *inetAddr, int port)
     if(ret != 0) {
         string str;
         str = string("Could not get host ") + string(inetAddr);
-        throw MySocketException(str.c_str());
+        throw SocketError(str.c_str());
     }
     
     server.sin_addr = ((struct sockaddr_in *) (res->ai_addr))->sin_addr;
@@ -36,70 +35,61 @@ MySocket::MySocket(const char *inetAddr, int port)
     // conenct to the server
     if( connect(sockFd, (struct sockaddr *) &server,
                 sizeof(server)) == -1 ) {
-        throw MySocketException("Did not connect to the server");
+        throw SocketError("Did not connect to the server");
     }
     
 }
-MySocket::MySocket(void)
-{
+MySocket::MySocket(void) {
     sockFd = -1;
 }
 
-MySocket::MySocket(int socketFileDesc)
-{
+MySocket::MySocket(int socketFileDesc) {
     sockFd = socketFileDesc;
 }
 
-MySocket::~MySocket(void)
-{
+MySocket::~MySocket(void) {
     close();
 }
 
 
-bool MySocket::write_bytes(string buffer)
-{
-    return write_bytes(buffer.c_str(), buffer.size());
+void MySocket::write(string buffer) {
+    write_bytes(buffer.c_str(), buffer.size());
 }
-bool MySocket::write_bytes(const void *buffer, int len)
-{
+
+void MySocket::write_bytes(const void *buffer, int len) {
     const unsigned char *buf = (const unsigned char *) buffer;
     int bytesWritten = 0;
 
-    if(sockFd<0) {
-      throw MySocketException("Not connected");
+    if (sockFd<0) {
+      throw SocketNotConnected();
     }
 
     while(len > 0) {
         bytesWritten = ::write(sockFd, buf, len);
         if(bytesWritten <= 0) {
-	  throw MySocketException("could not write to socket");
+	  throw SocketWriteError();
         }
         buf += bytesWritten;
         len -= bytesWritten;
     }
-
-    return true;
-
 }
 
-int MySocket::read(void *buffer, int len)
-{
+string MySocket::read() {
+    char buffer[4096];
     if(sockFd<0) {
-      throw MySocketException("Not connected");
+      throw SocketNotConnected();
     }
     
-    int ret = ::read(sockFd, buffer, len);
+    int ret = ::read(sockFd, buffer, sizeof(buffer));
     
-    // XXX FIXME should I throw an exception when ret == 0?
-    if(ret < 0) {
-      throw MySocketException("could not read from socket");
+    if(ret <= 0) {
+      throw SocketReadError();
     }
   
-    return ret;
+    return string(buffer, ret);
 }
 
-void MySocket::close(void)
-{
+void MySocket::close(void) {
     if(sockFd<0) return;
     
     ::close(sockFd);

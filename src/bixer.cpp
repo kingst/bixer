@@ -56,10 +56,10 @@ void *child(void *arg) {
       break;
     } else if (request->isHead()) {
       service->head(request, response);
-      client->write_bytes(response->response());
+      client->write(response->response());
     } else if (request->isGet()) {
       service->get(request, response);
-      client->write_bytes(response->response());
+      client->write(response->response());
       
       shared_ptr<BlockingQueue<string>> queue =
 	shared_ptr<BlockingQueue<string>>(new BlockingQueue<string>());
@@ -76,7 +76,7 @@ void *child(void *arg) {
 	  data = queue->popFront();
 	  HttpUtils::writeChunk(client, data.c_str(), data.length());
 	}
-      } catch (MySocketException mse) {
+      } catch (SocketWriteError swe) {
 	requestActive = false;
       } catch (...) {
 	// swallow it

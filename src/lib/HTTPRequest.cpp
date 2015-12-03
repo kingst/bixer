@@ -44,21 +44,17 @@ bool HTTPRequest::readRequest()
     unsigned char buf[1024];
 
     int num_bytes;
+    string readData;
 
     while(!m_http->isDone()) {
-        num_bytes = m_sock->read(buf, sizeof(buf));
-        if(num_bytes > 0) {
-            onRead(buf, (unsigned int) num_bytes);
-        } else {
-            cerr << "socket error" << endl;
-            return false;
-        }
+        readData = m_sock->read();
+	onRead(readData.c_str(), readData.size());
     }
 
     return true;
 }
 
-void HTTPRequest::onRead(const unsigned char *buffer, unsigned int len)
+void HTTPRequest::onRead(const char *buffer, unsigned int len)
 {
     m_totalBytesRead += len;
 
@@ -67,7 +63,7 @@ void HTTPRequest::onRead(const unsigned char *buffer, unsigned int len)
 
     while(bytesRead < len) {
         assert(!m_http->isDone());
-        int ret = m_http->addData(buffer + bytesRead, len - bytesRead);
+        int ret = m_http->addData((const unsigned char *) (buffer + bytesRead), len - bytesRead);
         assert(ret > 0);
         bytesRead += ret;
         
