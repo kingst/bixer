@@ -29,4 +29,5 @@
 *.out
 *.app
 
-hidden
+hidden/
+build/
