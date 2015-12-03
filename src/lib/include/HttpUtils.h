@@ -3,10 +3,16 @@
 
 #include <string>
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 #include <map>
 
 #include "MySocket.h"
+
+class MalformedQueryString : public std::runtime_error {
+ public:
+MalformedQueryString(std::string query) : std::runtime_error("could not parse query string " + query) {}
+};
 
 class HttpUtils {
  public:

@@ -15,7 +15,10 @@ map<string, string> HttpUtils::params(string query) {
   for (unsigned idx = 0; idx < pairs.size(); idx++) {
     string param = pairs[idx];
     vector<string> elements = split(param, '=');
-    assert(elements.size() == 2);
+    if (elements.size() != 2) {
+      throw MalformedQueryString(query);
+    }
+
     // XXX FIXME we need to url decode the strings
     paramMap[elements[0]] = elements[1];
   }
@@ -57,5 +60,12 @@ vector<string> &HttpUtils::split(const string &s,
 vector<string> HttpUtils::split(const string &s, char delim) {
   vector<string> elems;
   split(s, delim, elems);
-  return elems;
+
+  vector<string> result;
+  for (unsigned int idx = 0; idx < elems.size(); idx++) {
+    if (elems[idx].size() > 0) {
+      result.push_back(elems[idx]);
+    }
+  }
+  return result;
 }
