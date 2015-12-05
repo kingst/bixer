@@ -3,6 +3,8 @@
 #include <string>
 
 #include "HttpUtils.h"
+#include "MockSocket.h"
+
 #include "gtest/gtest.h"
 
 using namespace std;
@@ -47,4 +49,22 @@ TEST(HttpUtils, OneParam) {
 TEST(HttpUtils, ParamsExceptions) {
   ASSERT_THROW(HttpUtils::params("asdf"), MalformedQueryString);
   ASSERT_THROW(HttpUtils::params("asdf=1=a"), MalformedQueryString);
+}
+
+TEST(HttpUtils, ChunkedEncoding) {
+  FakeSocket socket;
+
+  HttpUtils::writeChunk(&socket, "hello", 5);
+  HttpUtils::writeLastChunk(&socket);
+  EXPECT_EQ(string("5\r\nhello\r\n0\r\n\r\n"), socket.output);
+}
+
+TEST(HttpUtils, ChunkedEncoding2) {
+  FakeSocket socket;
+
+  HttpUtils::writeChunk(&socket, "hello", 5);
+  HttpUtils::writeChunk(&socket, "hellohello", 10);
+  HttpUtils::writeLastChunk(&socket);
+  EXPECT_EQ(string("5\r\nhello\r\na\r\nhellohello\r\n0\r\n\r\n"),
+	    socket.output);
 }

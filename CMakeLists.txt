@@ -22,6 +22,8 @@ target_link_libraries (bixer libbixer)
 # copied from https://github.com/dmonopoly/gtest-cmake-example/blob/master/CMakeLists.txt
 ################################
 if (test)
+  include_directories(test/mocks)
+
   # This adds another subdirectory, which has 'project(gtest)'.
   add_subdirectory(submodules/googletest/googlemock)
 
